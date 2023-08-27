@@ -1,0 +1,26 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+
+  <h2>Состояние столов:</h2>
+  <ul>
+    {% for t in table_status %}
+      <li>
+        {{ t.table }}: {% if t.is_busy %} Занят{% else %} Свободен{% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+
+  {% if user_has_reservation %}
+  <p>Вы уже зарезервировали стол. Желаете отменить резервацию?</p>
+  <p>Звоните на номер +380 0984185576 чтобы отминить стол</p>
+
+  {% else %}
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">Зарезервировать стол</button>
+    </form>
+  {% endif %}
+
+{% endblock %}

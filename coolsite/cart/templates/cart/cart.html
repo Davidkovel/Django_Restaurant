@@ -1,0 +1,30 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<html>
+<head>
+    <title>Корзина</title>
+</head>
+<body>
+    <h1>Твоя Корзина</h1>
+    <ul>
+        {% for item in cart %}
+            <li>
+                {{ item.product.title }} -
+                {% if item.product.photo %}
+                    <p><img class="img-article-left" src="{{ item.product.photo.url }}"></p>
+                {% endif %}
+                - Количество: {{ item.quantity }}
+                - Стоимость: {{ item.total_price }}
+                - <a href="{% url 'remove_from_cart' item.product.id %}">Удалить</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <p>Total Price: {{ cart.get_total_price }}</p>
+    <p class="link-read-post"><a href="{% url 'clear_cart' %}">Очистить корзину</a></p>
+    <p class="link-read-post"><a href="{% url 'payment' %}">Оплатить</a></p>
+
+</body>
+</html>
+{% endblock %}

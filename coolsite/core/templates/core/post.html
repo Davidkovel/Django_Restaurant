@@ -1,0 +1,14 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<h1>{{post.title}}</h1>
+
+{% if post.photo %}
+    <p><img class="img-article-left" src="{{post.photo.url}}"></p>
+{% endif %}
+
+{{post.content|linebreaks}}
+    <h3>Цена: {{post.price}}</h3>
+<p class="link-read-post"><a href="{% url 'add_to_cart' post.id %}">Добавить корзину</a></p>
+
+{% endblock %}
