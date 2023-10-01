@@ -16,10 +16,11 @@ class BookTableForm(forms.ModelForm):
 class ContactForm(forms.ModelForm):
     name = forms.CharField(label="Имя", widget=forms.TextInput(attrs={'class': 'form-input'}))
     content = forms.CharField(label="Описания отзива", widget=forms.TextInput(attrs={'class': 'form-input'}))
+    email = forms.EmailField(label='Email', widget=forms.EmailInput(attrs={'class': 'form-input'}))
 
     class Meta:
         model = Contact  # Потом через Rest Api отображим Отзывы для клиента
-        fields = ['name', 'content']
+        fields = ['name', 'content', 'email']
         widgets = {
             'content': forms.Textarea(attrs={'cols': 60, 'rows': 10})
         }

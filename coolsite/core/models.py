@@ -56,6 +56,7 @@ class BookTable(models.Model):
 
 class Contact(models.Model):
     name = models.CharField(max_length=100, verbose_name="Имя")
+    email = models.CharField(max_length=50, null=True)
     content = models.TextField(blank=True, verbose_name="Описания")
 
     class Meta:

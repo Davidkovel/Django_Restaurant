@@ -11,7 +11,8 @@ from django.views.generic import ListView, DetailView, CreateView, TemplateView,
 from .forms import *
 from .utils import *
 from .models import *
-
+from .service import send
+from .tasks import send_spam_email
 
 class MainPage(DataMixin, ListView):
     model = Food
@@ -81,7 +82,9 @@ class Contact(DataMixin, CreateView):
 
     def form_valid(self, form):
         form.save()
-        return redirect('home')
+#        send(form.istance.email)
+        send_spam_email.delay(form.instance.email)
+        return super().form_valid(form)
 
 
 class BookTableList(LoginRequiredMixin, DataMixin, UpdateTableMixin, CreateView):
