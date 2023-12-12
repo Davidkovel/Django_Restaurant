@@ -13,4 +13,7 @@ urlpatterns = [
     path('login/', LoginUser.as_view(), name='login'),
     path('logout/', logout_user, name='logout'),
     path('register/', RegisterUser.as_view(), name='register'),
+    path('forward/', SendText.as_view(), name='send_text'),
+    path('post/<slug:post_slug>/comment_create/', ShowPost.as_view(), name='comment_create'),
+    path('post/<int:pk>/reply_create/', ReplyCreateView.as_view(), name='reply_create'),
 ]

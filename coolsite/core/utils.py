@@ -5,6 +5,7 @@ menu = [{"title": "О нас", "url_name": "about"},
         {"title": "Обратная связь", "url_name": "contact"},
         {"title": "Корзина", "url_name": "cart"},
         {"title": "Чат", "url_name": "chat"},
+        {"title": "Отправка текст", "url_name": "send_text"}
         ]
 
 

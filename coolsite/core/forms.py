@@ -26,6 +26,17 @@ class ContactForm(forms.ModelForm):
         }
 
 
+class ForwardForm(forms.ModelForm):
+    text = forms.TextInput()
+
+    class Meta:
+        model = Forward
+        fields = ['user_text']
+        widgets = {
+            'user_text': forms.Textarea(attrs={'cols': 20, 'rows': 1}),
+        }
+
+
 class RegisterUserForm(UserCreationForm):
     username = forms.CharField(label='Логин', widget=forms.TextInput(attrs={'class': 'form-input'}))
     email = forms.EmailField(label='Email', widget=forms.EmailInput(attrs={'class': 'form-input'}))
@@ -44,3 +55,15 @@ class LoginUserForm(AuthenticationForm):
 
     class Meta:
         fields = ('username', 'email', 'password')
+
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['text']
+
+
+class ReplyForm(forms.ModelForm):
+    class Meta:
+        model = Reply
+        fields = ['text']

@@ -11,4 +11,43 @@
     <h3>Цена: {{post.price}}</h3>
 <p class="link-read-post"><a href="{% url 'add_to_cart' post.id %}">Добавить корзину</a></p>
 
+<!-- Display Comments -->
+<h2>Комментарии</h2>
+{% if comments %}
+    <ul>
+        {% for comment in comments %}
+            <li>
+                {{ comment.user.username }}: {{ comment.text }}
+
+                <!-- Display Replies -->
+                {% if comment.replies.all %}
+                    <ul>
+                        {% for reply in comment.replies.all %}
+                            <li>{{ reply.user.username }}: {{ reply.text }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <!-- Reply Form -->
+                <form method="POST" action="{% url 'reply_create' pk=comment.pk %}">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit">Ответить</button>
+                </form>
+
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No comments yet.</p>
+{% endif %}
+
+<!-- Comment Form -->
+<form method="POST" action="{% url 'comment_create' post_slug=post.slug %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Оставить комментарий</button>
+</form>
+
+
 {% endblock %}

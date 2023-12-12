@@ -2,6 +2,7 @@ from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import User
 
+
 class Food(models.Model):
     title = models.CharField(max_length=255, verbose_name="Названия")
     content = models.TextField(blank=True, verbose_name="Описания")
@@ -63,3 +64,32 @@ class Contact(models.Model):
         verbose_name = "Отзивы"
         verbose_name_plural = "Отзивы"
         ordering = ["id"]
+
+
+class Forward(models.Model):  # [TEST] for Celery
+    user_text = models.TextField(blank=True, verbose_name="Текст пользователя")
+
+
+class Comment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    food = models.ForeignKey(Food, related_name='comments', on_delete=models.CASCADE)
+    text = models.TextField(verbose_name="Текст комментария")
+    created_date = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    approved_comment = models.BooleanField(default=False)
+
+    def approve(self):
+        self.approved_comment = True
+        self.save()
+
+    def __str__(self):
+        return self.text
+
+
+class Reply(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    comment = models.ForeignKey(Comment, related_name='replies', on_delete=models.CASCADE)
+    text = models.TextField(verbose_name="Текст ответа")
+    created_date = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+
+    def __str__(self):
+        return self.text

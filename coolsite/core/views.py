@@ -12,7 +12,8 @@ from .forms import *
 from .utils import *
 from .models import *
 from .service import send
-from .tasks import send_spam_email
+from .tasks import send_spam_email, send_user_text
+
 
 class MainPage(DataMixin, ListView):
     model = Food
@@ -35,12 +36,75 @@ class ShowPost(DataMixin, DetailView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context()
+        c_def = self.get_user_context(title="")
+        context['comments'] = self.object.comments.all()
+        context['form'] = CommentForm()
         return context | c_def
 
     def get_object(self, queryset=None):
         post_slug = self.kwargs['post_slug']
         return Food.objects.get(slug=post_slug)
+
+    def post(self, request, *args, **kwargs):
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.user = request.user
+            comment.food = self.get_object()
+            comment.save()
+            return redirect('post', post_slug=self.get_object().slug)
+
+        context = self.get_context_data()
+        context['form'] = form
+        return self.render_to_response(context)
+
+
+class ReplyCreateView(View):
+    template_name = 'core/post.html'
+
+    def post(self, request, pk, *args, **kwargs):
+        comment = get_object_or_404(Comment, pk=pk)
+        form = ReplyForm(request.POST)
+
+        if form.is_valid():
+            reply = form.save(commit=False)
+            reply.user = request.user
+            reply.comment = comment
+            reply.save()
+            return redirect('post', post_slug=comment.food.slug)
+
+        show_post_view = ShowPost()
+        context = show_post_view.get_context_data(post=comment.food)
+        context['form'] = form
+        return render(request, self.template_name, context)
+
+
+# def comment_create(request):
+#     if request.method == "POST":
+#         form = CommentForm(request.POST)
+#         if form.is_valid():
+#             comment = form.save(commit=False)
+#             comment.user = request.user
+#             comment.save()
+#             return redirect('comment_create', pk=comment.pk)
+#     else:
+#         form = CommentForm()
+#     return render(request, 'core/post.html', {'form': form})
+
+
+# def reply_create(request, pk):
+#     comment = get_object_or_404(Comment, pk=pk)
+#     if request.method == "POST":
+#         form = ReplyForm(request.POST)
+#         if form.is_valid():
+#             reply = form.save(commit=False)
+#             reply.user = request.user
+#             reply.comment = comment
+#             reply.save()
+#             return redirect('reply_detail', pk=reply.pk)
+#     else:
+#         form = ReplyForm()
+#     return render(request, 'core/post.html', {'form': form})
 
 
 class ShowCategory(DataMixin, ListView):  # ListView - отображения списка объектов модели в шаблоне.
@@ -82,7 +146,7 @@ class Contact(DataMixin, CreateView):
 
     def form_valid(self, form):
         form.save()
-#        send(form.istance.email)
+        #        send(form.istance.email)
         send_spam_email.delay(form.instance.email)
         return super().form_valid(form)
 
@@ -92,7 +156,7 @@ class BookTableList(LoginRequiredMixin, DataMixin, UpdateTableMixin, CreateView)
     form_class = BookTableForm
     template_name = 'core/book_table.html'
     context_object_name = 'table_status'
-    success_url = 'home'
+    success_url = reverse_lazy('home')
 
     def get_queryset(self):
         return BookTable.objects.all()
@@ -120,6 +184,25 @@ class BookTableList(LoginRequiredMixin, DataMixin, UpdateTableMixin, CreateView)
             print('Error: Missing table_id or user_book')
         # form.save()
         return redirect('home')
+
+
+class SendText(DataMixin, CreateView):  # [TEST] for celery
+    model = Forward
+    form_class = ForwardForm
+    template_name = "core/forward_text.html"
+    success_url = reverse_lazy('home')
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title="Отправка текст")
+        return context | c_def
+
+    def form_valid(self, form):
+        user_text = form.cleaned_data['user_text']
+        send_user_text(user_text)
+
+        return super().form_valid(form)
+
 
 class RegisterUser(DataMixin,
                    CreateView):  # CreateView - отображает форму для создания объекта, повторно отображает форму с ошибками валидации и сохраняет объект в базе данных.
