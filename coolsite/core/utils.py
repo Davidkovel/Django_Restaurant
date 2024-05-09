@@ -1,11 +1,12 @@
-from .models import *
+from django.core.cache import cache
 
+from .models import *
 menu = [{"title": "О нас", "url_name": "about"},
         {"title": "Заказать стол", "url_name": "book_table"},
         {"title": "Обратная связь", "url_name": "contact"},
         {"title": "Корзина", "url_name": "cart"},
         {"title": "Чат", "url_name": "chat"},
-        {"title": "Отправка текст", "url_name": "send_text"}
+        {"title": "Отправка текст", "url_name": "send_text"},
         ]
 
 
@@ -23,7 +24,11 @@ class UpdateTableMixin:
 class DataMixin:
     def get_user_context(self, **kwargs):
         context = kwargs
-        cats = Category.objects.all()
+
+        cats = cache.get("cats")
+        if not cats:
+            cats = Category.objects.all()
+            cache.set("cats", cats, 15)
 
         user_menu = menu.copy()
         if not self.request.user.is_authenticated:
