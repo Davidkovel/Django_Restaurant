@@ -1,0 +1,58 @@
+#version: "3.9"
+#
+#services:
+#  redis:
+#    image: redis
+#    restart: always
+#    ports:
+#      - "6379:6379"
+#
+#  webapp:
+#    restart: always
+#    build: ./
+#    volumes:
+#      - ./:/app
+#    ports:
+#      - "8000:8000"
+#    command: >
+#      sh -c "python manage.py makemigrations &&
+#      python manage.py migrate
+#      && python manage.py runserver 0.0.0.0:8000"
+#
+#  worker:
+#    restart: always
+#    build: .
+#    volumes:
+#      - ./:/app
+#    depends_on:
+#      - redis
+#      - webapp
+#    command: 'celery -A proj worker -l info'
+
+#
+#    image: sqlite3:latest
+#    container_name: db
+#    volumes:
+#      - ./:/app
+
+version: "3.9"
+
+services:
+  dj_project:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dj_project
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+      - ./db.sqlite3:/app/db.sqlite3
+      - static_volume:/app/static
+      - media_volume:/app/media
+    command: >
+      bash -c "./manage.py collectstatic --noinput && ./manage.py migrate  && ./manage.py runserver 0.0.0.0:8000"
+
+volumes:
+  static_volume:
+  media_volume:

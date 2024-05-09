@@ -11,8 +11,8 @@ from django.views.generic import ListView, DetailView, CreateView, TemplateView,
 from .forms import *
 from .utils import *
 from .models import *
-from .service import send
-from .tasks import send_spam_email, send_user_text
+# from .service import send
+# from .tasks import send_spam_email, send_user_text
 
 
 class MainPage(DataMixin, ListView):
@@ -147,7 +147,7 @@ class Contact(DataMixin, CreateView):
     def form_valid(self, form):
         form.save()
         #        send(form.istance.email)
-        send_spam_email.delay(form.instance.email)
+        # send_spam_email.delay(form.instance.email)
         return super().form_valid(form)
 
 
@@ -199,7 +199,7 @@ class SendText(DataMixin, CreateView):  # [TEST] for celery
 
     def form_valid(self, form):
         user_text = form.cleaned_data['user_text']
-        send_user_text(user_text)
+        # send_user_text(user_text)
 
         return super().form_valid(form)
 
