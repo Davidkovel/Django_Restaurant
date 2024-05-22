@@ -21,9 +21,11 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install Dependencies
+      working-directory: coolsite
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Check Django Application
+      working-directory: coolsite
       run: |
         python manage.py check
